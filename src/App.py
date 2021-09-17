@@ -108,13 +108,19 @@ class Register(tk.Frame):
 
         add_student_photos = DatasetFaces()
         add_student_photos.start(self.no_cuenta.get())
-
         self.cursor.fetchall()
         self.conexion.commit()
+        self.clean_fields()
 
     def train_model(self):
         trainer = Trainer()
         trainer.train()
         self.master.switch_frames(Start)
+
+
+    def clean_fields(self):
+        self.no_cuenta.set("")
+        self.name.set("")
+        self.last_name.set("")
 
 
