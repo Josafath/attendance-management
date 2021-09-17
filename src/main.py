@@ -18,7 +18,7 @@ class Project(tk.Tk):
 
     def _style(self):
         self.geometry("840x550")
-        self.title("Attendence :)")
+        self.title("Attendance :)")
         tk.Tk.config(self,cnf=None,bg="#264653")
 
 
