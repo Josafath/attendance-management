@@ -45,7 +45,7 @@ class DatasetFaces:
 
 
     def check_existence_directory(self):
-        if not os.path.isdir("/dataset"):
+        if not os.path.isdir("dataset"):
             current_workspace = os.getcwd()
             path = os.path.join(current_workspace, "dataset")
             os.mkdir(path)
