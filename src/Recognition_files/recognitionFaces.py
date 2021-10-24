@@ -5,9 +5,9 @@ class Recognition:
 
     def __init__(self):
         self.recognizer = cv2.face.LBPHFaceRecognizer_create()
-        self.faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+        self.faceCascade = cv2.CascadeClassifier("Recognition_files//haarcascade_frontalface_default.xml")
 
-        self.recognizer.read('trainer/trainer.yml')
+        self.recognizer.read('Recognition_files/trainer/trainer.yml')
 
         self.font = cv2.FONT_HERSHEY_COMPLEX
 
@@ -15,7 +15,7 @@ class Recognition:
         self.cam.set(3, 640)
         self.cam.set(4, 480)
 
-        self.ids_students = []
+        self.id_students = []
 
 
     def go(self):
@@ -26,7 +26,7 @@ class Recognition:
 
             ret,img = self.cam.read()
 
-            gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             faces = self.faceCascade.detectMultiScale(
                 gray,
@@ -41,13 +41,13 @@ class Recognition:
                 id, confidence = self.recognizer.predict(gray[y:y + h, x:x + w])
 
                 if (confidence < 100):
-                    self.ids_students.append(id)
+                    self.id_students.append(id)
                     confidence = "  {0}%".format(round(100 - confidence))
                 else:
                     confidence = "  {0}%".format(round(100 - confidence))
 
 
-                cv2.putText(img, "Next", (x + 5, y - 5), self.font, 1, (255, 255, 255), 2)
+                cv2.putText(img, "Check", (x + 5, y - 5), self.font, 1, (255, 255, 255), 2)
 
             cv2.imshow('Taking Attendance', img)
 
@@ -57,7 +57,7 @@ class Recognition:
                 break
 
         self.finish()
-        return np.unique(self.ids_students)
+        return np.unique(self.id_students)
 
     def finish(self):
         self.cam.release()

@@ -9,11 +9,11 @@ class Trainer:
 
     def __init__(self):
         self.check_existence_directory()
-        self.path = os.path.join(os.getcwd(), "dataset")
+        self.path = os.path.join(os.getcwd(), "Recognition_files//dataset")
         print(self.path)
 
         self.recognizer = cv2.face.LBPHFaceRecognizer_create()
-        self.detector = cv2.CascadeClassifier("haarcascade_frontalface_default.xml");
+        self.detector = cv2.CascadeClassifier("Recognition_files//haarcascade_frontalface_default.xml");
 
     def train(self):
         print("\n [INFO] Training faces. It will take a few seconds. Wait ...")
@@ -22,7 +22,7 @@ class Trainer:
 
         faces, ids = self.getImagesandIds()
         self.recognizer.train(faces,np.array(ids))
-        self.recognizer.write('trainer/trainer.yml')
+        self.recognizer.write('Recognition_files//trainer//trainer.yml')
 
         print("[INFO] Traning finished with success!")
 
@@ -46,7 +46,7 @@ class Trainer:
         return facesSample, ids
 
     def check_existence_directory(self):
-        if not os.path.isdir("/trainer"):
+        if not os.path.isdir("Recognition_files//trainer"):
             current_workspace = os.getcwd()
-            path = os.path.join(current_workspace, "trainer")
+            path = os.path.join(current_workspace, "Recognition_files//trainer")
             os.mkdir(path)
