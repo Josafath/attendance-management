@@ -1,0 +1,7 @@
+# Everything needed to run the app:  pip install -r requirements.txt
+# opencv-python 4.8+ already includes the YuNet face detector and the SFace recognizer
+# (cv2.FaceDetectorYN and cv2.FaceRecognizerSF), so opencv-contrib is not needed anymore.
+# numpy is installed with OpenCV anyway; it's listed because the code uses it directly.
+# Everything else (Tkinter, SQLite, Excel export) uses Python's standard library.
+opencv-python>=4.8
+numpy>=1.23
