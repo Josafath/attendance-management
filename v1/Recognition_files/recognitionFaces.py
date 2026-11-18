@@ -1,13 +1,22 @@
 import cv2
 import numpy as np
 
+from Recognition_files.datasetFaces import CASCADE_FILE
+from Recognition_files.trainerFaces import TRAINER_FILE
+
+# LBPH returns a distance, not a percentage: 0 = identical, bigger = more different.
+# Fix: before, any face with a distance under 100 was accepted, so people who were
+# not registered were marked as present. Lower it if strangers are still accepted,
+# raise it if registered students are not recognized.
+MAX_DISTANCE = 70
+
 class Recognition:
 
     def __init__(self):
         self.recognizer = cv2.face.LBPHFaceRecognizer_create()
-        self.faceCascade = cv2.CascadeClassifier("Recognition_files//haarcascade_frontalface_default.xml")
+        self.faceCascade = cv2.CascadeClassifier(CASCADE_FILE)
 
-        self.recognizer.read('Recognition_files/trainer/trainer.yml')
+        self.recognizer.read(TRAINER_FILE)
 
         self.font = cv2.FONT_HERSHEY_COMPLEX
 
@@ -25,6 +34,9 @@ class Recognition:
         while True:
 
             ret,img = self.cam.read()
+            # Fix: stop if the camera doesn't give an image (before, it crashed)
+            if not ret:
+                break
 
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -36,28 +48,27 @@ class Recognition:
             )
 
             for (x,y,w,h) in faces:
-                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                id, distance = self.recognizer.predict(gray[y:y + h, x:x + w])
 
-                id, confidence = self.recognizer.predict(gray[y:y + h, x:x + w])
-
-                if (confidence < 100):
-                    self.id_students.append(id)
-                    confidence = "  {0}%".format(round(100 - confidence))
+                if distance < MAX_DISTANCE:
+                    self.id_students.append(int(id))
+                    # Fix: show who was recognized (green) instead of "Check" for everyone
+                    color, text = (0, 255, 0), f"Id {id}"
                 else:
-                    confidence = "  {0}%".format(round(100 - confidence))
+                    color, text = (0, 0, 255), "Unknown"
 
+                cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+                cv2.putText(img, text, (x + 5, y - 5), self.font, 1, color, 2)
 
-                cv2.putText(img, "Check", (x + 5, y - 5), self.font, 1, (255, 255, 255), 2)
-
-            cv2.imshow('Taking Attendance', img)
+            cv2.imshow('Taking Attendance (ESC to finish)', img)
 
             k = cv2.waitKey(10) & 0xff  # Press 'ESC' for exiting video
             if k == 27:
-                self.finish()
                 break
 
+        # Fix: finish() was called twice when ESC was pressed
         self.finish()
-        return np.unique(self.id_students)
+        return [int(id) for id in np.unique(self.id_students)]
 
     def finish(self):
         self.cam.release()
