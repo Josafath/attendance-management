@@ -1,0 +1,70 @@
+name: v2 tests
+
+on:
+  push:
+    paths: ["v2/**", ".github/workflows/v2-tests.yml"]
+  pull_request:
+    paths: ["v2/**", ".github/workflows/v2-tests.yml"]
+
+jobs:
+  pytest:
+    name: ${{ matrix.os }} · Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false  # show every OS's result, not just the first failure
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.12"]
+    defaults:
+      run:
+        working-directory: v2
+        shell: bash  # the same commands on all three systems
+    env:
+      ROLLCALL_TEST_ASSETS: ${{ github.workspace }}/test-assets
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: v2/requirements*.txt
+
+      # The real face models (38 MB) and two sample photos from OpenCV, for the
+      # end-to-end tests. Downloaded once and cached; never stored in the repo.
+      - name: Cache test assets
+        id: assets
+        uses: actions/cache@v4
+        with:
+          path: test-assets
+          key: test-assets-yunet2023mar-sface2021dec-v1
+
+      - name: Download test assets
+        if: steps.assets.outputs.cache-hit != 'true'
+        working-directory: .
+        run: |
+          mkdir -p test-assets
+          cd test-assets
+          zoo=https://github.com/opencv/opencv_zoo/raw/main/models
+          samples=https://raw.githubusercontent.com/opencv/opencv/4.x/samples/data
+          curl -fsSL -o face_detection_yunet_2023mar.onnx  "$zoo/face_detection_yunet/face_detection_yunet_2023mar.onnx"
+          curl -fsSL -o face_recognition_sface_2021dec.onnx "$zoo/face_recognition_sface/face_recognition_sface_2021dec.onnx"
+          curl -fsSL -o messi5.jpg "$samples/messi5.jpg"
+          curl -fsSL -o lena.jpg   "$samples/lena.jpg"
+
+      - name: Install
+        run: pip install -r requirements-dev.txt
+
+      # Linux: a virtual display (Xvfb) so the Tkinter UI tests can run.
+      - name: Test (Linux, with UI tests)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1
+          xvfb-run -a python -m pytest -v
+
+      - name: Test (Windows / macOS)
+        if: runner.os != 'Linux'
+        env:
+          ROLLCALL_SKIP_UI_TESTS: "1"
+        run: python -m pytest -v
