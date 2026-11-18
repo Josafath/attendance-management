@@ -1,0 +1,6 @@
+# Install with:  pip install -r requirements.txt
+# opencv-contrib-python (not opencv-python): cv2.face, the face recognizer, is only in the contrib build
+opencv-contrib-python>=4.5
+numpy
+Pillow
+xlsxwriter

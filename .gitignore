@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Attendance app: personal data created when the app runs.
+# Pictures of faces, the trained model, the students database and attendance lists
+# must never be uploaded.
+v1/Recognition_files/dataset/
+v1/Recognition_files/trainer/
+*.db
+Attendance_*.xlsx
