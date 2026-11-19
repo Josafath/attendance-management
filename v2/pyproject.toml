@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rollcall"
+version = "2.0.0"
+description = "Class attendance with face recognition (OpenCV YuNet + SFace), Tkinter and SQLite"
+# Only OpenCV and NumPy: the UI, the database and the Excel export use the standard library.
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "opencv-python>=4.8",
+    "numpy>=1.23",
+]
+
+[project.scripts]
+rollcall = "rollcall.ui.app:main"  # after "pip install .", just type: rollcall
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.setuptools]
+packages = ["rollcall", "rollcall.ui"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]  # so the tests can "import rollcall" without installing it
